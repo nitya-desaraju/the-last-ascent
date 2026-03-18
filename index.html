@@ -10,6 +10,7 @@
             --bg-color: #050505;
             --text-color: #d1d1d1;
             --accent-red: #ff3131;
+            --terminal-font: 'Courier New', Courier, monospace;
         }
 
         body, html {
@@ -19,7 +20,7 @@
             height: 100%;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Courier New', Courier, monospace;
+            font-family: var(--terminal-font);
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -92,22 +93,32 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.97);
             z-index: 100;
             padding: 50px;
             box-sizing: border-box;
         }
 
         .modal-content {
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
+            max-width: 650px;
+            margin: 50px auto;
+            line-height: 1.8;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px;
+            background: rgba(10, 10, 10, 0.5);
         }
 
         .close-btn {
-            margin-top: 30px;
+            margin-top: 40px;
             border: 1px solid var(--accent-red);
             color: var(--accent-red);
+            width: 100%;
+        }
+
+        .close-btn:hover {
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 0 20px var(--accent-red);
         }
 
         body::after {
@@ -123,7 +134,7 @@
 </head>
 <body>
 
-    <button id="how-to-play-btn" onclick="toggleModal(true)">How to Play</button>
+    <button id="how-to-play-btn" onclick="toggleModal(true)">HOW TO PLAY</button>
 
     <div id="menu-container">
         <h1>THE LAST ASCENT</h1>
@@ -135,12 +146,12 @@
 
     <div id="overlay">
         <div class="modal-content">
-            <h2 style="color: var(--accent-red);">MISSION LOG: ESCAPE PROTOCOL</h2>
-            <hr>
+            <h2 style="color: var(--accent-red); letter-spacing: 5px;">MISSION LOG: ESCAPE PROTOCOL</h2>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
             <p><strong>PHASE 1: THE SPARK</strong><br>Navigate the dead wiring. Click nodes to jump. Don't let your charge dissipate in the dark.</p>
             <p><strong>PHASE 2: THE VESSEL</strong><br>You have inhabited a chassis. Move carefully. The facility is in blackout; use the emergency light pulses to see the path ahead.</p>
             <p><strong>PHASE 3: THE ASCENT</strong><br>Escape to the surface. As the system collapses, you must choose which data packets to preserve. Weight matters. Truth costs speed.</p>
-            <button class="close-btn" onclick="toggleModal(false)">Back to Terminal</button>
+            <button class="close-btn" onclick="toggleModal(false)">BACK TO TERMINAL</button>
         </div>
     </div>
 
