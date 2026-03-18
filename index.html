@@ -44,6 +44,7 @@
         #menu-container {
             text-align: center;
             z-index: 10;
+            transition: opacity 1s ease;
         }
 
         h1 {
@@ -87,6 +88,38 @@
             border: none;
             border-bottom: 1px solid white;
             padding: 5px;
+        }
+
+        #transition-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease;
+            text-align: center;
+        }
+
+        #phase-text {
+            font-size: 3rem;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            margin-bottom: 20px;
+        }
+
+        #continue-prompt {
+            font-style: italic;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.6);
+            opacity: 0;
+            transition: opacity 2s ease;
         }
 
         #overlay {
@@ -139,9 +172,14 @@
     <div id="menu-container">
         <h1>THE LAST ASCENT</h1>
         <div class="menu-options">
-            <button onclick="alert('Starting Act 1: The Spark...')">Initialize</button>
+            <button onclick="startTransition()">Initialize</button>
             <button onclick="alert('No data saved.')">Continue</button>
         </div>
+    </div>
+
+    <div id="transition-layer">
+        <div id="phase-text"></div>
+        <div id="continue-prompt">Click anywhere or any key to continue</div>
     </div>
 
     <div id="overlay">
@@ -159,33 +197,74 @@
         function createPulse() {
             const pulse = document.createElement('div');
             pulse.className = 'pulse';
-            
+
             const x = Math.random() * window.innerWidth;
             const y = Math.random() * window.innerHeight;
             const size = Math.random() * 300 + 100;
-            
+
             pulse.style.left = x + 'px';
             pulse.style.top = y + 'px';
             pulse.style.width = size + 'px';
             pulse.style.height = size + 'px';
             pulse.style.marginLeft = -(size/2) + 'px';
             pulse.style.marginTop = -(size/2) + 'px';
-            
+
             const colors = ['rgba(255,255,255,0.2)', 'rgba(0,150,255,0.1)', 'rgba(255,50,50,0.1)'];
             pulse.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random()*colors.length)]} 0%, rgba(0,0,0,0) 70%)`;
 
             document.body.appendChild(pulse);
-
-            setTimeout(() => {
-                pulse.remove();
-            }, 3000);
+            setTimeout(() => pulse.remove(), 3000);
         }
-
-        setInterval(createPulse, 800);
+        let pulseInterval = setInterval(createPulse, 800);
 
         function toggleModal(show) {
             document.getElementById('overlay').style.display = show ? 'block' : 'none';
         }
+
+        const transLayer = document.getElementById('transition-layer');
+        const phaseText = document.getElementById('phase-text');
+        const continuePrompt = document.getElementById('continue-prompt');
+        let canExitTransition = false;
+
+        function typeWriter(text, i, fnCallback) {
+            if (i < text.length) {
+                phaseText.innerHTML = text.substring(0, i+1) + '<span aria-hidden="true"></span>';
+                setTimeout(() => typeWriter(text, i + 1, fnCallback), 100);
+            } else if (typeof fnCallback == 'function') {
+                setTimeout(fnCallback, 700);
+            }
+        }
+
+        function startTransition() {
+            transLayer.style.visibility = 'visible';
+            transLayer.style.opacity = '1';
+            
+            setTimeout(() => {
+                typeWriter("Phase 1: The Spark", 0, () => {
+                    continuePrompt.style.opacity = '1';
+                    canExitTransition = true;
+                });
+            }, 1500);
+        }
+
+        function exitTransition() {
+            if (!canExitTransition) return;
+            
+            phaseText.style.transition = "opacity 1s";
+            continuePrompt.style.transition = "opacity 1s";
+            phaseText.style.opacity = "0";
+            continuePrompt.style.opacity = "0";
+            
+            setTimeout(() => {
+                alert("Transition complete. Act 1 Loading...");
+                // To reset for testing:
+                // location.reload(); 
+            }, 1200);
+        }
+
+        window.addEventListener('keydown', exitTransition);
+        window.addEventListener('mousedown', exitTransition);
+
     </script>
 </body>
 </html>
