@@ -202,10 +202,26 @@
             background: #fff;
             box-shadow: 0 0 10px #fff;
         }
+
+        #move-instruction {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-style: italic;
+            font-family: var(--terminal-font);
+            font-size: 1.2rem;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s ease;
+        }
     </style>
 </head>
 <body>
     <canvas id="game-canvas"></canvas>
+    <div id="move-instruction">Use arrow keys or A/D to move the spark along the wire</div>
     <div id="jump-ui"><div id="green-zone"></div><div id="slider-bar"></div></div>
     <button id="how-to-play-btn" onclick="toggleModal(true)">HOW TO PLAY</button>
 
@@ -265,8 +281,10 @@
         const transLayer = document.getElementById('transition-layer');
         const phaseText = document.getElementById('phase-text');
         const continuePrompt = document.getElementById('continue-prompt');
+        const moveInstruction = document.getElementById('move-instruction');
         let canExitTransition = false;
         let gameActive = false;
+        let hasMoved = false;
 
         function typeWriter(text, i, fnCallback) {
             if (i < text.length) {
@@ -311,6 +329,8 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             spark.y = canvas.height / 2;
+            moveInstruction.style.opacity = "1";
+
             requestAnimationFrame(gameLoop);
         }
 
@@ -319,6 +339,12 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             let currentWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
+            
+            if (!hasMoved && (keys.d || keys.ArrowRight || keys.a || keys.ArrowLeft)) {
+                hasMoved = true;
+                moveInstruction.style.opacity = "0";
+            }
+
             if (keys.d || keys.ArrowRight) {
                 if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
                     spark.x += spark.speed;
