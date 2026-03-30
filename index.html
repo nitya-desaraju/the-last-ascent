@@ -358,6 +358,12 @@
 
             cameraX = spark.x - 200;
 
+            let lastWire = wires[wires.length - 1];
+            if (spark.x >= lastWire.x + lastWire.w - 5) {
+                gameActive = false;
+                startPhase2Transition();
+            }
+
             ctx.strokeStyle = '#00d4ff';
             ctx.lineWidth = 4;
             ctx.shadowBlur = 15;
@@ -413,6 +419,8 @@
             if (e.key in keys) keys[e.key] = false;
         });
 
+        let currentPhase = 1;
+
         function exitTransition() {
             if (!canExitTransition) return;
 
@@ -422,8 +430,13 @@
             continuePrompt.style.opacity = "0";
             
             setTimeout(() => {
-                document.getElementById('menu-container').style.display = 'none';
-                initGame();
+                if (currentPhase === 1) {
+                    document.getElementById('menu-container').style.display = 'none';
+                    initGame();
+                    currentPhase = 2;
+                } else if (currentPhase === 2) {
+                    alert("Phase 2 starts");
+                }
 
                 transLayer.style.transition = "opacity 1.5s ease";
                 transLayer.style.opacity = "0";
@@ -432,6 +445,27 @@
                     transLayer.style.visibility = "hidden";
                 }, 1500);
             }, 800);
+        }
+
+        function startPhase2Transition() {
+            transLayer.style.visibility = 'visible';
+            transLayer.style.transition = "opacity 1.5s ease";
+            transLayer.style.opacity = '1';
+            
+            phaseText.style.opacity = "1"; 
+            phaseText.innerHTML = "";
+            continuePrompt.style.opacity = "0";
+            canExitTransition = false;
+
+            setTimeout(() => {
+                canvas.style.display = 'none';
+                jumpUI.style.display = 'none';
+
+                typeWriter("Phase 2: The Vessel", 0, () => {
+                    continuePrompt.style.opacity = '1';
+                    canExitTransition = true; 
+                });
+            }, 1500);
         }
 
         window.addEventListener('mousedown', () => { if (canExitTransition && !gameActive) exitTransition(); });
