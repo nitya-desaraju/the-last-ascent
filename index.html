@@ -315,7 +315,7 @@
         const jumpUI = document.getElementById('jump-ui');
         const sliderBar = document.getElementById('slider-bar');
 
-        let spark = { x: 100, y: 0, speed: 5 };
+        let spark = { x: 100, y: 0, vy: 0, speed: 5, speedX: 0, state: 'onWire' };
         let wires = [{ x: 50, w: 400 }, { x: 550, w: 500 }, { x: 1150, w: 600 }];
         let cameraX = 0;
         let sliderPos = 0;
@@ -345,21 +345,43 @@
                 moveInstruction.style.opacity = "0";
             }
 
-            if (keys.d || keys.ArrowRight) {
-                if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
-                    spark.x += spark.speed;
+            if (spark.state === 'onWire') {
+                if (keys.d || keys.ArrowRight) {
+                    if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
+                        spark.x += spark.speed;
+                    }
                 }
-            }
-            if (keys.a || keys.ArrowLeft) {
-                if (currentWire && spark.x - spark.speed >= currentWire.x) {
-                    spark.x -= spark.speed;
+
+                if (keys.a || keys.ArrowLeft) {
+                    if (currentWire && spark.x - spark.speed >= currentWire.x) {
+                        spark.x -= spark.speed;
+                    }
+                }
+
+            } else if (spark.state === 'jumping' || spark.state === 'failing') {
+                spark.x += spark.speedX;
+                spark.y += spark.vy;
+                spark.vy += 0.25;
+
+                if (spark.state === 'jumping') {
+                    let landingWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
+                    if (landingWire && spark.y >= canvas.height / 2 && spark.vy > 0) {
+                        spark.y = canvas.height / 2;
+                        spark.vy = 0;
+                        spark.state = 'onWire';
+                        spark.speedX = 0;
+                    }
+                }
+                
+                if (spark.y > canvas.height + 50) {
+                    gameActive = false; 
                 }
             }
 
             cameraX = spark.x - 200;
 
             let lastWire = wires[wires.length - 1];
-            if (spark.x >= lastWire.x + lastWire.w - 5) {
+            if (spark.state === 'onWire' && spark.x >= lastWire.x + lastWire.w - 5) {
                 gameActive = false;
                 startPhase2Transition();
             }
@@ -371,13 +393,13 @@
 
             wires.forEach(w => {
                 ctx.beginPath();
-                ctx.moveTo(w.x - cameraX, spark.y);
-                ctx.lineTo(w.x + w.w - cameraX, spark.y);
+                ctx.moveTo(w.x - cameraX, canvas.height / 2);
+                ctx.lineTo(w.x + w.w - cameraX, canvas.height / 2);
                 ctx.stroke();
                 
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(w.x - cameraX - 5, spark.y - 5, 10, 10);
-                ctx.fillRect(w.x + w.w - cameraX - 5, spark.y - 5, 10, 10);
+                ctx.fillRect(w.x - cameraX - 5, canvas.height / 2 - 5, 10, 10);
+                ctx.fillRect(w.x + w.w - cameraX - 5, canvas.height / 2 - 5, 10, 10);
             });
 
             ctx.fillStyle = '#fff';
@@ -391,7 +413,7 @@
             if (sliderPos > 100 || sliderPos < 0) sliderDir *= -1;
             sliderBar.style.left = sliderPos + '%';
 
-            let nearEnd = currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
+            let nearEnd = spark.state === 'onWire' && currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
             jumpUI.style.display = nearEnd ? 'block' : 'none';
 
             requestAnimationFrame(gameLoop);
@@ -406,11 +428,18 @@
             if (e.key in keys) keys[e.key] = true;
 
             let currentWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
-            let nearEnd = currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
+            let nearEnd = spark.state === 'onWire' && currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
             
             if (e.code === 'Space' && nearEnd) {
+                jumpUI.style.display = 'none';
+                spark.vy = -6;
+                
                 if (sliderPos > 40 && sliderPos < 60) {
-                    spark.x += 100;
+                    spark.state = 'jumping';
+                    spark.speedX = 3.0;
+                } else {
+                    spark.state = 'failing';
+                    spark.speedX = 1.5;
                 }
             }
         });
