@@ -543,8 +543,13 @@
                     document.getElementById('menu-container').style.display = 'none';
                     initGame();
                     currentPhase = 2;
+
                 } else if (currentPhase === 2) {
-                    alert("Phase 2 starts");
+                    startPhase3Transition();
+                    currentPhase = 3;
+
+                } else if (currentPhase === 3) {
+                    alert("phase 3");
                 }
 
                 transLayer.style.transition = "opacity 1.5s ease";
@@ -571,6 +576,27 @@
                 jumpUI.style.display = 'none';
 
                 typeWriter("Phase 2: The Vessel", 0, () => {
+                    continuePrompt.style.opacity = '1';
+                    canExitTransition = true; 
+                });
+            }, 1500);
+        }
+
+        function startPhase3Transition() {
+            transLayer.style.visibility = 'visible';
+            transLayer.style.transition = "opacity 1.5s ease";
+            transLayer.style.opacity = '1';
+            
+            phaseText.style.opacity = "1"; 
+            phaseText.innerHTML = "";
+            continuePrompt.style.opacity = "0";
+            canExitTransition = false;
+
+            setTimeout(() => {
+                canvas.style.display = 'none';
+                jumpUI.style.display = 'none';
+
+                typeWriter("Phase 3: The Ascent", 0, () => {
                     continuePrompt.style.opacity = '1';
                     canExitTransition = true; 
                 });
