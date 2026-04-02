@@ -411,7 +411,7 @@
             canvas.style.display = 'block';
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            spark.y = canvas.height / 2;
+            spark.y = canvas.height * 0.6;
             moveInstruction.style.opacity = "1";
             //spark.x = 5000; //start at last wire for testing
 
@@ -419,6 +419,8 @@
         }
 
         function gameLoop() {
+            let groundY = canvas.height * 0.6;
+
             if (!gameActive) return;
             if (!isPaused) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -450,8 +452,8 @@
 
                     if (spark.state === 'jumping') {
                         let landingWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
-                        if (landingWire && spark.y >= canvas.height / 2 && spark.vy > 0) {
-                            spark.y = canvas.height / 2;
+                        if (landingWire && spark.y >= groundY && spark.vy > 0) {
+                            spark.y = groundY;
                             spark.vy = 0;
                             spark.state = 'onWire';
                             spark.speedX = 0;
@@ -478,13 +480,13 @@
 
                 wires.forEach(w => {
                     ctx.beginPath();
-                    ctx.moveTo(w.x - cameraX, canvas.height / 2);
-                    ctx.lineTo(w.x + w.w - cameraX, canvas.height / 2);
+                    ctx.moveTo(w.x - cameraX, groundY);
+                    ctx.lineTo(w.x + w.w - cameraX, groundY);
                     ctx.stroke();
                     
                     ctx.fillStyle = '#fff';
-                    ctx.fillRect(w.x - cameraX - 5, canvas.height / 2 - 5, 10, 10);
-                    ctx.fillRect(w.x + w.w - cameraX - 5, canvas.height / 2 - 5, 10, 10);
+                    ctx.fillRect(w.x - cameraX - 5, groundY - 5, 10, 10);
+                    ctx.fillRect(w.x + w.w - cameraX - 5, groundY - 5, 10, 10);
                 });
 
                 ctx.fillStyle = '#fff';
@@ -534,7 +536,7 @@
                 
                 if (sliderPos > 40 && sliderPos < 60) {
                     spark.state = 'jumping';
-                    spark.speedX = 3.0;
+                    spark.speedX = 3.25;
                 } else {
                     spark.state = 'failing';
                     spark.speedX = 1.5;
