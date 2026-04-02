@@ -90,6 +90,50 @@
             padding: 5px;
         }
 
+        #pause-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 5000;
+            font-size: 1.2rem;
+            border: 1px solid white;
+            padding: 10px 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 2s ease, background 0.3s, color 0.3s;
+            border-radius: 4px;
+            font-family: var(--terminal-font);
+        }
+
+        #pause-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(2px);
+            z-index: 6000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #pause-modal {
+            background: var(--bg-color);
+            border: 1px solid white;
+            padding: 40px 80px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255,255,255,0.1);
+        }
+
+        #pause-modal h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            letter-spacing: 10px;
+        }
+
+        #pause-modal button {
+            border-radius: 4px;
+        }
+
         #transition-layer {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -223,6 +267,15 @@
     <canvas id="game-canvas"></canvas>
     <div id="move-instruction">Use arrow keys or A/D to move the spark along the wire</div>
     <div id="jump-ui"><div id="green-zone"></div><div id="slider-bar"></div></div>
+    
+    <button id="pause-btn" onclick="togglePause()">PAUSE</button>
+    <div id="pause-overlay">
+        <div id="pause-modal">
+            <h2>PAUSED</h2>
+            <button onclick="togglePause()">RESUME</button>
+        </div>
+    </div>
+
     <button id="how-to-play-btn" onclick="toggleModal(true)">HOW TO PLAY</button>
 
     <div id="menu-container">
@@ -251,7 +304,10 @@
 
     <script>
         let pulseInterval;
+        let isPaused = false;
+
         function createPulse() {
+            if (isPaused) return;
             const pulse = document.createElement('div');
             pulse.className = 'pulse';
 
@@ -278,6 +334,13 @@
             document.getElementById('overlay').style.display = show ? 'block' : 'none';
         }
 
+        function togglePause() {
+            if (!document.getElementById('pause-btn').style.visibility === 'hidden') return;
+            
+            isPaused = !isPaused;
+            document.getElementById('pause-overlay').style.display = isPaused ? 'flex' : 'none';
+        }
+
         const transLayer = document.getElementById('transition-layer');
         const phaseText = document.getElementById('phase-text');
         const continuePrompt = document.getElementById('continue-prompt');
@@ -287,6 +350,10 @@
         let hasMoved = false;
 
         function typeWriter(text, i, fnCallback) {
+            if (isPaused) {
+                setTimeout(() => typeWriter(text, i, fnCallback), 100);
+                return;
+            }
             if (i < text.length) {
                 phaseText.innerHTML = text.substring(0, i+1);
                 setTimeout(() => typeWriter(text, i + 1, fnCallback), 100);
@@ -303,6 +370,10 @@
             transLayer.style.opacity = '1';
 
             setTimeout(() => {
+                const pBtn = document.getElementById('pause-btn');
+                pBtn.style.visibility = 'visible';
+                pBtn.style.opacity = '1';
+
                 typeWriter("Phase 1: The Spark", 0, () => {
                     continuePrompt.style.opacity = '1';
                     canExitTransition = true;
@@ -336,90 +407,99 @@
 
         function gameLoop() {
             if (!gameActive) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            let currentWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
-            
-            if (!hasMoved && (keys.d || keys.ArrowRight || keys.a || keys.ArrowLeft)) {
-                hasMoved = true;
-                moveInstruction.style.opacity = "0";
-            }
-
-            if (spark.state === 'onWire') {
-                if (keys.d || keys.ArrowRight) {
-                    if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
-                        spark.x += spark.speed;
-                    }
-                }
-
-                if (keys.a || keys.ArrowLeft) {
-                    if (currentWire && spark.x - spark.speed >= currentWire.x) {
-                        spark.x -= spark.speed;
-                    }
-                }
-
-            } else if (spark.state === 'jumping' || spark.state === 'failing') {
-                spark.x += spark.speedX;
-                spark.y += spark.vy;
-                spark.vy += 0.25;
-
-                if (spark.state === 'jumping') {
-                    let landingWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
-                    if (landingWire && spark.y >= canvas.height / 2 && spark.vy > 0) {
-                        spark.y = canvas.height / 2;
-                        spark.vy = 0;
-                        spark.state = 'onWire';
-                        spark.speedX = 0;
-                    }
-                }
+            if (!isPaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                if (spark.y > canvas.height + 50) {
-                    gameActive = false; 
-                }
-            }
-
-            cameraX = spark.x - 200;
-
-            let lastWire = wires[wires.length - 1];
-            if (spark.state === 'onWire' && spark.x >= lastWire.x + lastWire.w - 5) {
-                gameActive = false;
-                startPhase2Transition();
-            }
-
-            ctx.strokeStyle = '#00d4ff';
-            ctx.lineWidth = 4;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00d4ff';
-
-            wires.forEach(w => {
-                ctx.beginPath();
-                ctx.moveTo(w.x - cameraX, canvas.height / 2);
-                ctx.lineTo(w.x + w.w - cameraX, canvas.height / 2);
-                ctx.stroke();
+                let currentWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
                 
+                if (!hasMoved && (keys.d || keys.ArrowRight || keys.a || keys.ArrowLeft)) {
+                    hasMoved = true;
+                    moveInstruction.style.opacity = "0";
+                }
+
+                if (spark.state === 'onWire') {
+                    if (keys.d || keys.ArrowRight) {
+                        if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
+                            spark.x += spark.speed;
+                        }
+                    }
+
+                    if (keys.a || keys.ArrowLeft) {
+                        if (currentWire && spark.x - spark.speed >= currentWire.x) {
+                            spark.x -= spark.speed;
+                        }
+                    }
+
+                } else if (spark.state === 'jumping' || spark.state === 'failing') {
+                    spark.x += spark.speedX;
+                    spark.y += spark.vy;
+                    spark.vy += 0.25;
+
+                    if (spark.state === 'jumping') {
+                        let landingWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
+                        if (landingWire && spark.y >= canvas.height / 2 && spark.vy > 0) {
+                            spark.y = canvas.height / 2;
+                            spark.vy = 0;
+                            spark.state = 'onWire';
+                            spark.speedX = 0;
+                        }
+                    }
+                    
+                    if (spark.y > canvas.height + 50) {
+                        gameActive = false; 
+                    }
+                }
+
+                cameraX = spark.x - 200;
+
+                let lastWire = wires[wires.length - 1];
+                if (spark.state === 'onWire' && spark.x >= lastWire.x + lastWire.w - 5) {
+                    gameActive = false;
+                    startPhase2Transition();
+                }
+
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00d4ff';
+
+                wires.forEach(w => {
+                    ctx.beginPath();
+                    ctx.moveTo(w.x - cameraX, canvas.height / 2);
+                    ctx.lineTo(w.x + w.w - cameraX, canvas.height / 2);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(w.x - cameraX - 5, canvas.height / 2 - 5, 10, 10);
+                    ctx.fillRect(w.x + w.w - cameraX - 5, canvas.height / 2 - 5, 10, 10);
+                });
+
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(w.x - cameraX - 5, canvas.height / 2 - 5, 10, 10);
-                ctx.fillRect(w.x + w.w - cameraX - 5, canvas.height / 2 - 5, 10, 10);
-            });
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#fff';
+                ctx.beginPath();
+                ctx.arc(spark.x - cameraX, spark.y, 8, 0, Math.PI * 2);
+                ctx.fill();
 
-            ctx.fillStyle = '#fff';
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#fff';
-            ctx.beginPath();
-            ctx.arc(spark.x - cameraX, spark.y, 8, 0, Math.PI * 2);
-            ctx.fill();
+                sliderPos += 2.5 * sliderDir;
+                if (sliderPos > 100 || sliderPos < 0) sliderDir *= -1;
+                sliderBar.style.left = sliderPos + '%';
 
-            sliderPos += 2.5 * sliderDir;
-            if (sliderPos > 100 || sliderPos < 0) sliderDir *= -1;
-            sliderBar.style.left = sliderPos + '%';
-
-            let nearEnd = spark.state === 'onWire' && currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
-            jumpUI.style.display = nearEnd ? 'block' : 'none';
+                let nearEnd = spark.state === 'onWire' && currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
+                jumpUI.style.display = nearEnd ? 'block' : 'none';
+            }
 
             requestAnimationFrame(gameLoop);
         }
 
         window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'p') {
+                togglePause();
+                return;
+            }
+
+            if (isPaused) return;
+
             if (!gameActive) {
                 if (canExitTransition) exitTransition();
                 return;
@@ -451,7 +531,7 @@
         let currentPhase = 1;
 
         function exitTransition() {
-            if (!canExitTransition) return;
+            if (!canExitTransition || isPaused) return;
 
             phaseText.style.transition = "opacity 0.8s";
             continuePrompt.style.transition = "opacity 0.8s";
@@ -497,7 +577,9 @@
             }, 1500);
         }
 
-        window.addEventListener('mousedown', () => { if (canExitTransition && !gameActive) exitTransition(); });
+        window.addEventListener('mousedown', () => { 
+            if (canExitTransition && !gameActive && !isPaused) exitTransition(); 
+        });
     </script>
 </body>
 </html>
