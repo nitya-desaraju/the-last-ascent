@@ -413,6 +413,7 @@
             canvas.height = window.innerHeight;
             spark.y = canvas.height / 2;
             moveInstruction.style.opacity = "1";
+            //spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
         }
@@ -497,7 +498,12 @@
                 if (sliderPos > 100 || sliderPos < 0) sliderDir *= -1;
                 sliderBar.style.left = sliderPos + '%';
 
-                let nearEnd = spark.state === 'onWire' && currentWire && Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
+                let isLastWire = currentWire === wires[wires.length - 1];
+                let nearEnd = spark.state === 'onWire' && 
+                            currentWire && 
+                            !isLastWire && 
+                            Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
+
                 jumpUI.style.display = nearEnd ? 'block' : 'none';
             }
 
