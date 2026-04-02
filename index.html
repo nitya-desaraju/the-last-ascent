@@ -387,7 +387,19 @@
         const sliderBar = document.getElementById('slider-bar');
 
         let spark = { x: 100, y: 0, vy: 0, speed: 5, speedX: 0, state: 'onWire' };
-        let wires = [{ x: 50, w: 400 }, { x: 550, w: 500 }, { x: 1150, w: 600 }];
+        let wires = [
+            { x: 50, w: 300 }, 
+            { x: 500, w: 450 }, 
+            { x: 1100, w: 280 }, 
+            { x: 1530, w: 520 }, 
+            { x: 2200, w: 350 },
+            { x: 2700, w: 410 },
+            { x: 3260, w: 290 },
+            { x: 3700, w: 600 },
+            { x: 4450, w: 320 },
+            { x: 4920, w: 450 }
+        ];
+
         let cameraX = 0;
         let sliderPos = 0;
         let sliderDir = 1;
