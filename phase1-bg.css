@@ -6,7 +6,6 @@
     --neon-red: #ff3131;
     --neon-green: #00ff4c;
     --window-bright: rgba(200, 230, 255, 0.6);
-    --building-tint: #0a0a12;
 }
 
 .dystopian-bg {
@@ -20,8 +19,8 @@
     overflow: hidden;
     pointer-events: none;
     display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    visibility: hidden;
+    opacity: 0;
 }
 
 .mega-structures {
@@ -76,7 +75,7 @@
     filter: drop-shadow(0 0 5px var(--window-bright));
 }
 
-.shops-container {
+.shops {
     position: absolute;
     bottom: 40%;
     width: 10000px;
@@ -105,15 +104,13 @@
 .shop-3 { left: 1800px; width: 320px; height: 190px; }
 .shop-4 { left: 2800px; width: 260px; height: 155px; }
 .shop-5 { left: 3800px; width: 300px; height: 175px; }
-.shop-6 { left: 4800px; width: 250px; height: 160px; }
-.shop-7 { left: 5600px; width: 310px; height: 180px; }
 
 .neon-sign {
     font-family: 'Courier New', monospace;
     font-weight: bold;
     font-size: 22px;
     position: absolute;
-    top: -50px;
+    top: 15px;
     left: 0;
     width: 100%;
     text-align: center;
@@ -124,12 +121,16 @@
 
 .open-sign {
     position: absolute;
-    bottom: 12px;
-    right: 12px;
+    bottom: auto;
+    right: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-size: 11px;
     padding: 3px 6px;
     border: 1px solid currentColor;
     background: rgba(0,0,0,0.7);
+    animation: neon-pulse 1.5s infinite alternate;
 }
 
 .blue { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue); }
@@ -161,9 +162,4 @@
 @keyframes neon-pulse {
     from { filter: brightness(1) drop-shadow(0 0 2px currentColor); }
     to { filter: brightness(1.5) drop-shadow(0 0 12px currentColor); }
-}
-
-@keyframes drift {
-    from { transform: translateX(-5%); }
-    to { transform: translateX(5%); }
 }
