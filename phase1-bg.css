@@ -1,0 +1,180 @@
+:root {
+    --bg-deep: #020205;
+    --neon-pink: #ff00ff;
+    --neon-blue: #00d4ff;
+    --neon-yellow: #ffcc00;
+    --neon-red: #ff3131;
+    --window-glow: rgba(140, 180, 255, 0.1);
+    --building-tint: #0a0a12;
+}
+
+.dystopian-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 20%, #0d0d1a 0%, #050508 100%);
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.mega-structures {
+    position: absolute;
+    bottom: 40%;
+    width: 200%;
+    height: 70%;
+    background: 
+        linear-gradient(90deg, transparent 5%, #05050a 5%, #05050a 15%, transparent 15%),
+        linear-gradient(90deg, transparent 30%, #080812 30%, #080812 45%, transparent 45%),
+        linear-gradient(90deg, transparent 70%, #040408 70%, #040408 90%, transparent 90%);
+    background-size: 800px 100%;
+    filter: blur(6px);
+    opacity: 0.4;
+}
+
+.mega-structures::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(90deg, transparent 0, transparent 150px, #080812 150px, #080812 152px);
+    mask-image: linear-gradient(to top, transparent 80%, black 100%);
+}
+
+.sky-bridge {
+    position: absolute;
+    height: 8px;
+    background: #0d0d1a;
+    border-top: 1px solid rgba(0, 212, 255, 0.1);
+    width: 100%;
+    top: 30%;
+    opacity: 0.2;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.mid-ground {
+    position: absolute;
+    bottom: 40%;
+    width: 250%; 
+    height: 55%;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 2px;
+}
+
+.building-tall {
+    width: 220px;
+    height: 130%;
+    background: #0a0a12;
+    margin-right: -50px;
+    border-left: 1px solid #1a1a2e;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 20px 0 50px rgba(0,0,0,0.8);
+}
+
+.building-tall::after {
+    content: '';
+    position: absolute;
+    top: 5%; left: 10%; width: 80%; height: 90%;
+    background-image: 
+        radial-gradient(var(--window-glow) 1px, transparent 1px);
+    background-size: 15px 25px;
+    opacity: 0.6;
+}
+
+.shops-container {
+    position: absolute;
+    bottom: 40%;
+    width: 300%;
+    height: 250px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.shop-front {
+    position: relative;
+    width: 200px;
+    height: 140px;
+    background: #12121a;
+    border: 1px solid #1a1a2e;
+    margin-right: 180px;
+    box-shadow: inset 0 0 40px #000;
+}
+
+.shop-front::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.shop-1 { height: 160px; width: 220px; }
+.shop-2 { height: 130px; }
+.shop-3 { height: 180px; width: 240px; }
+
+
+.neon-sign, .neon-tag {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 14px;
+    position: absolute;
+    top: -25px;
+    left: 10px;
+    z-index: 5;
+}
+
+.flicker-blue {
+    color: var(--neon-blue);
+    animation: flicker 3s infinite;
+}
+
+.flicker-pink {
+    color: var(--neon-pink);
+    animation: flicker 5s infinite reverse;
+}
+
+.street-floor {
+    position: absolute;
+    top: 60%; 
+    width: 100%;
+    height: 40%;
+    background: #020205;
+    overflow: hidden;
+}
+
+.street-floor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: 
+        radial-gradient(ellipse at 20% 0%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 0%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+    opacity: 0.7;
+}
+
+.fog-bank {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 20%;
+    background: linear-gradient(to bottom, transparent, rgba(15, 15, 25, 0.5), transparent);
+    filter: blur(20px);
+    z-index: 2;
+    animation: drift 20s linear infinite;
+}
+
+@keyframes flicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; filter: brightness(1); }
+    20%, 24%, 55% { opacity: 0.5; filter: brightness(0.5); }
+}
+
+@keyframes drift {
+    from { transform: translateX(-10%); }
+    to { transform: translateX(10%); }
+}

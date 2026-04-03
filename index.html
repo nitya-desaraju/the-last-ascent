@@ -369,16 +369,31 @@
 </head>
 <body>
     <div class="dystopian-bg">
-        <div class="neon-lights">
-            <div class="light blue"></div>
-            <div class="light pink"></div>
+        <div class="mega-structures"></div>
+        
+        <div class="mid-ground">
+            <div class="building-tall"></div>
+            <div class="building-tall" style="height: 110%;"></div>
+            <div class="building-tall" style="height: 150%;"></div>
+            <div class="building-tall"></div>
+            <div class="building-tall" style="height: 130%;"></div>
         </div>
+
         <div class="shops">
-            <div class="shop"><div class="vent"></div></div>
-            <div class="shop" style="height: 130px; border-color: #00d4ff33;"></div>
-            <div class="shop"></div>
-            <div class="shop" style="height: 110px;"></div>
+            <div class="shop-front">
+                <span class="neon-tag blue-neon">Noodle Stall</span>
+            </div>
+            <div class="shop-front" style="height: 150px; width: 120px;">
+                <span class="neon-tag pink-neon">Capsule</span>
+            </div>
+            <div class="shop-front">
+                <span class="neon-tag blue-neon">Repair</span>
+            </div>
+            <div class="shop-front" style="width: 250px;">
+                <span class="neon-tag pink-neon">Data Haven</span>
+            </div>
         </div>
+
         <div class="street-floor"></div>
     </div>
 
@@ -711,8 +726,13 @@
                 cameraX = spark.x - 200;
 
                 const shops = document.querySelector('.shops');
+                const midGround = document.querySelector('.mid-ground');
+                const megaStructures = document.querySelector('.mega-structures');
                 const bg = document.querySelector('.dystopian-bg');
-                if (shops) shops.style.transform = `translateX(${-cameraX * 0.2}px)`;
+
+                if (shops) shops.style.transform = `translateX(${-cameraX * 0.8}px)`;
+                if (midGround) midGround.style.transform = `translateX(${-cameraX * 0.4}px)`;
+                if (megaStructures) megaStructures.style.transform = `translateX(${-cameraX * 0.1}px)`;
                 if (bg) bg.style.backgroundPositionX = `${-cameraX * 0.05}px`;
 
                 let lastWire = wires[wires.length - 1];
