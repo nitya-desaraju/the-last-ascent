@@ -516,6 +516,12 @@
             
             const quoteElem = document.getElementById('death-quote');
             quoteElem.innerText = deathSentences[Math.floor(Math.random() * deathSentences.length)];
+            
+            const bg = document.querySelector('.dystopian-bg');
+            if (bg) {
+                bg.style.opacity = '0';
+                bg.style.visibility = 'hidden';
+            }
         }
 
         function restartGame() {
@@ -539,6 +545,10 @@
                 isPaused = false;
                 hasMoved = false;
                 gameActive = false;
+                
+                botTriggered = false;
+                botWalking = false;
+                botXOffset = 0;
                 
                 currentPhase = 1;
                 startTransition(); 
@@ -629,6 +639,16 @@
         const jumpUI = document.getElementById('jump-ui');
         const sliderBar = document.getElementById('slider-bar');
 
+        const botImg = new Image();
+        botImg.src = 'assets/bot.png';
+        const botWalkImg = new Image();
+        botWalkImg.src = 'assets/bot_walk.png';
+
+        let botTriggered = false;
+        let botWalking = false;
+        let botXOffset = 0;
+        let botFrameCount = 0;
+
         let spark = { x: 100, y: 0, vy: 0, speed: 5, speedX: 0, state: 'onWire' };
         let wires = [
             { x: 50, w: 300 }, 
@@ -688,7 +708,7 @@
                 bg.style.visibility = 'visible';
                 bg.style.opacity = '1';
             }
-            //spark.x = 5000; //start at last wire for testing
+            spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
         }
@@ -708,71 +728,81 @@
                     moveInstruction.style.opacity = "0";
                 }
 
-                if (spark.state !== 'failing') {
-                    if (isMoving && spark.state === 'onWire') {
-                        batteryValue -= movingRate;
-                    } else {
-                        batteryValue -= stoppedRate;
-                    }
-                }
-                
-                if (batteryValue <= 0){
-                    batteryValue = 0;
-                    triggerDeath();
-                }
-                updateBatteryUI();
-
-                if (spark.state === 'onWire') {
-                    if (keys.d || keys.ArrowRight) {
-                        if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
-                            spark.x += spark.speed;
-                        }
-                    }
-
-                    if (keys.a || keys.ArrowLeft) {
-                        if (currentWire && spark.x - spark.speed >= currentWire.x) {
-                            spark.x -= spark.speed;
-                        }
-                    }
-
-                } else if (spark.state === 'jumping' || spark.state === 'failing') {
-                    spark.x += spark.speedX;
-                    spark.y += spark.vy;
-                    spark.vy += 0.25;
-
-                    if (spark.state === 'jumping') {
-                        let landingWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
-                        if (landingWire && spark.y >= groundY && spark.vy > 0) {
-                            spark.y = groundY;
-                            spark.vy = 0;
-                            spark.state = 'onWire';
-                            spark.speedX = 0;
-                            batteryValue = Math.min(84, batteryValue + jumpBoost);
+                if (!botTriggered) {
+                    if (spark.state !== 'failing') {
+                        if (isMoving && spark.state === 'onWire') {
+                            batteryValue -= movingRate;
+                        } else {
+                            batteryValue -= stoppedRate;
                         }
                     }
                     
-                    if (spark.y > canvas.height + 50) {
+                    if (batteryValue <= 0){
+                        batteryValue = 0;
                         triggerDeath();
                     }
-                }
+                    updateBatteryUI();
 
-                cameraX = spark.x - 200;
+                    if (spark.state === 'onWire') {
+                        if (keys.d || keys.ArrowRight) {
+                            if (currentWire && spark.x + spark.speed <= currentWire.x + currentWire.w) {
+                                spark.x += spark.speed;
+                            }
+                        }
+
+                        if (keys.a || keys.ArrowLeft) {
+                            if (currentWire && spark.x - spark.speed >= currentWire.x) {
+                                spark.x -= spark.speed;
+                            }
+                        }
+
+                    } else if (spark.state === 'jumping' || spark.state === 'failing') {
+                        spark.x += spark.speedX;
+                        spark.y += spark.vy;
+                        spark.vy += 0.25;
+
+                        if (spark.state === 'jumping') {
+                            let landingWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
+                            if (landingWire && spark.y >= groundY && spark.vy > 0) {
+                                spark.y = groundY;
+                                spark.vy = 0;
+                                spark.state = 'onWire';
+                                spark.speedX = 0;
+                                batteryValue = Math.min(84, batteryValue + jumpBoost);
+                            }
+                        }
+                        
+                        if (spark.y > canvas.height + 50) {
+                            triggerDeath();
+                        }
+                    }
+
+                    cameraX = spark.x - 200;
+
+                    let lastWire = wires[wires.length - 1];
+                    let botTargetX = lastWire.x + lastWire.w;
+                    if (spark.x >= botTargetX - 5 && spark.state === 'onWire') {
+                        botTriggered = true;
+                        setTimeout(() => {
+                            botWalking = true;
+                        }, 500);
+                    }
+                } else if (botWalking) {
+                    botXOffset += 3;
+                    botFrameCount++;
+                    if (botXOffset > canvas.width) {
+                        botWalking = false;
+                        startPhase2Transition();
+                    }
+                }
 
                 const shops = document.querySelector('.shops');
                 const midGround = document.querySelector('.mid-ground');
                 const megaStructures = document.querySelector('.mega-structures');
-                const bg = document.querySelector('.dystopian-bg');
 
                 if (shops) shops.style.transform = `translateX(${-cameraX * 0.8}px)`;
                 if (midGround) midGround.style.transform = `translateX(${-cameraX * 0.4}px)`;
                 if (megaStructures) megaStructures.style.transform = `translateX(${-cameraX * 0.1}px)`;
-                if (bg) bg.style.backgroundPositionX = `${-cameraX * 0.05}px`;
-
-                let lastWire = wires[wires.length - 1];
-                if (spark.state === 'onWire' && spark.x >= lastWire.x + lastWire.w - 5) {
-                    gameActive = false;
-                    startPhase2Transition();
-                }
 
                 ctx.strokeStyle = '#00d4ff';
                 ctx.lineWidth = 4;
@@ -790,24 +820,44 @@
                     ctx.fillRect(w.x + w.w - cameraX - 5, groundY - 5, 10, 10);
                 });
 
-                ctx.fillStyle = '#fff';
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#fff';
-                ctx.beginPath();
-                ctx.arc(spark.x - cameraX, spark.y, 8, 0, Math.PI * 2);
-                ctx.fill();
+                let lastW = wires[wires.length - 1];
+                let currentBotImg = botImg;
+                let bobOffset = 0;
+                
+                if (botWalking) {
+                    currentBotImg = Math.floor(botFrameCount / 10) % 2 === 0 ? botWalkImg : botImg;
+                    bobOffset = Math.sin(botFrameCount * 0.2) * 5;
+                }
+
+                ctx.shadowBlur = 0;
+                ctx.drawImage(
+                    currentBotImg, 
+                    (lastW.x + lastW.w + botXOffset - 30) - cameraX, 
+                    groundY - 60 + bobOffset, 
+                    60, 60
+                );
+
+                if (!botTriggered) {
+                    ctx.fillStyle = '#fff';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(spark.x - cameraX, spark.y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
 
                 sliderPos += 2.5 * sliderDir;
                 if (sliderPos > 100 || sliderPos < 0) sliderDir *= -1;
                 sliderBar.style.left = sliderPos + '%';
 
-                let isLastWire = currentWire === wires[wires.length - 1];
+                let currentWireCheck = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
+                let isLastWire = currentWireCheck === wires[wires.length - 1];
                 let nearEnd = spark.state === 'onWire' && 
-                            currentWire && 
+                            currentWireCheck && 
                             !isLastWire && 
-                            Math.abs(spark.x - (currentWire.x + currentWire.w)) < 10;
+                            Math.abs(spark.x - (currentWireCheck.x + currentWireCheck.w)) < 10;
 
-                jumpUI.style.display = nearEnd ? 'block' : 'none';
+                jumpUI.style.display = (nearEnd && !botTriggered) ? 'block' : 'none';
             }
 
             requestAnimationFrame(gameLoop);
@@ -819,7 +869,7 @@
                 return;
             }
 
-            if (isPaused) return;
+            if (isPaused || botTriggered) return;
 
             if (!gameActive) {
                 if (canExitTransition) exitTransition();
@@ -884,6 +934,7 @@
 
         function startPhase2Transition() {
             transLayer.style.opacity = '0';
+            transLayer.style.zIndex = '100000';
             transLayer.style.visibility = 'visible';
             transLayer.style.transition = "opacity 1.5s ease";
             transLayer.style.opacity = '1';
@@ -912,7 +963,9 @@
         }
 
         function startPhase3Transition() {
+            transLayer.style.opacity = '0';
             transLayer.style.visibility = 'visible';
+            transLayer.style.zIndex = '100000';
             transLayer.style.transition = "opacity 1.5s ease";
             transLayer.style.opacity = '1';
             
