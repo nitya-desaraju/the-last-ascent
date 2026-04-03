@@ -364,8 +364,24 @@
             max-width: 500px;
         }
     </style>
+
+    <link rel="stylesheet" href="phase1-bg.css">
 </head>
 <body>
+    <div class="dystopian-bg">
+        <div class="neon-lights">
+            <div class="light blue"></div>
+            <div class="light pink"></div>
+        </div>
+        <div class="shops">
+            <div class="shop"><div class="vent"></div></div>
+            <div class="shop" style="height: 130px; border-color: #00d4ff33;"></div>
+            <div class="shop"></div>
+            <div class="shop" style="height: 110px;"></div>
+        </div>
+        <div class="street-floor"></div>
+    </div>
+
     <canvas id="game-canvas"></canvas>
     
     <div id="battery-container">
@@ -619,6 +635,11 @@
             moveInstruction.style.opacity = "1";
             batteryValue = 84;
             updateBatteryUI();
+            const bg = document.querySelector('.dystopian-bg');
+            if (bg) {
+                bg.style.visibility = 'visible';
+                bg.style.opacity = '1';
+            }
             //spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
@@ -688,6 +709,11 @@
                 }
 
                 cameraX = spark.x - 200;
+
+                const shops = document.querySelector('.shops');
+                const bg = document.querySelector('.dystopian-bg');
+                if (shops) shops.style.transform = `translateX(${-cameraX * 0.2}px)`;
+                if (bg) bg.style.backgroundPositionX = `${-cameraX * 0.05}px`;
 
                 let lastWire = wires[wires.length - 1];
                 if (spark.state === 'onWire' && spark.x >= lastWire.x + lastWire.w - 5) {
@@ -804,9 +830,16 @@
         }
 
         function startPhase2Transition() {
+            transLayer.style.opacity = '0';
             transLayer.style.visibility = 'visible';
             transLayer.style.transition = "opacity 1.5s ease";
             transLayer.style.opacity = '1';
+
+            const bg = document.querySelector('.dystopian-bg');
+            if (bg) {
+                bg.style.opacity = '0';
+                setTimeout(() => { bg.style.visibility = 'hidden'; }, 2000);
+            }
             
             phaseText.style.opacity = "1"; 
             phaseText.innerHTML = "";
