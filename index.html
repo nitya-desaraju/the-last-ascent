@@ -304,6 +304,64 @@
             max-width: 90vw;
             line-height: 1.6;
         }
+
+        #death-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(49, 0, 0, 0.85);
+            z-index: 9999;
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #death-overlay::after {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.1), rgba(0, 0, 0, 0), rgba(255, 0, 0, 0.1));
+            z-index: 10000;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #death-content {
+            text-align: center;
+            z-index: 10001;
+        }
+
+        #death-title {
+            font-size: 5rem;
+            color: #a20b0b;
+            font-style: italic;
+            letter-spacing: 15px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px black;
+        }
+
+        #restart-btn {
+            background: #6d0303;
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            border-radius: 4px;
+        }
+
+        #restart-btn:hover {
+            background: #420000; 
+        }
+
+        #death-quote {
+            margin-top: 100px; 
+            color: #888;
+            font-style: italic;
+            font-size: 0.9rem;
+            max-width: 500px;
+        }
     </style>
 </head>
 <body>
@@ -358,9 +416,63 @@
         </div>
     </div>
 
+    <div id="death-overlay">
+        <div id="death-content">
+            <h2 id="death-title">YOU DIED</h2>
+            <button id="restart-btn" onclick="restartGame()">RESTART</button>
+            <p id="death-quote"></p>
+        </div>
+    </div>
+
     <script>
         let pulseInterval;
         let isPaused = false;
+
+        const deathSentences = [
+            "ALERT: SYSTEM FAILURE IMMINENT",
+            "All hope will be lost...",
+            "???",
+            "System integrity compromised.",
+            "What's the point of trying?",
+            "Everyone you know and love will die along the way.",
+            "What's beyond the surface?",
+            "You can't save anyone. You can't save yourself.",
+            "Choose death, for it's the only escape.",,
+            "Oh no",
+            "In the end, we all return to the void.",
+        ];
+
+        function triggerDeath() {
+            gameActive = false;
+            isPaused = true;
+            
+            const overlay = document.getElementById('death-overlay');
+            overlay.style.display = 'flex';
+            
+            const quoteElem = document.getElementById('death-quote');
+            quoteElem.innerText = deathSentences[Math.floor(Math.random() * deathSentences.length)];
+        }
+
+        function restartGame() {
+            const transLayer = document.getElementById('transition-layer');
+            transLayer.style.visibility = 'visible';
+            transLayer.style.opacity = '1';
+            
+            setTimeout(() => {
+                document.getElementById('death-overlay').style.display = 'none';
+                batteryValue = 84;
+                spark.x = 100;
+                spark.y = canvas.height * 0.6;
+                spark.state = 'onWire';
+                spark.vy = 0;
+                cameraX = 0;
+                isPaused = false;
+                hasMoved = false;
+                
+                currentPhase = 1;
+                startTransition(); 
+            }, 1000);
+        }
 
         function createPulse() {
             if (isPaused) return;
@@ -524,7 +636,10 @@
                     }
                 }
                 
-                if (batteryValue < 0) batteryValue = 0;
+                if (batteryValue <= 0){
+                    batteryValue = 0;
+                    triggerDeath();
+                }
                 updateBatteryUI();
 
                 if (spark.state === 'onWire') {
@@ -557,7 +672,7 @@
                     }
                     
                     if (spark.y > canvas.height + 50) {
-                        gameActive = false; 
+                        triggerDeath();
                     }
                 }
 
