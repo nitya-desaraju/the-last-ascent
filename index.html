@@ -532,6 +532,28 @@
         const uiCanvas = document.getElementById('ui-canvas');
         const uiCtx = uiCanvas.getContext('2d');
 
+        const mainMenuAudio = new Audio('assets/main_menu.mp3');
+        mainMenuAudio.loop = true;
+        mainMenuAudio.volume = 1;
+
+        window.addEventListener('mousedown', () => {
+            if (mainMenuAudio.paused && menuActive) {
+                mainMenuAudio.play();
+            }
+        }, { once: true });
+
+        function fadeOutAudio(audio) {
+            const fadePoint = setInterval(() => {
+                if (audio.volume > 0.05) {
+                    audio.volume -= 0.05;
+                } else {
+                    audio.volume = 0;
+                    audio.pause();
+                    clearInterval(fadePoint);
+                }
+            }, 50); 
+        }
+
         function fadeOutToMenu() {
             transLayer.style.transition = "opacity 1s ease";
             transLayer.style.opacity = '0';
@@ -752,6 +774,7 @@
         function startTransition() {
             menuActive = false;
             uiCanvas.style.opacity = '0';
+            fadeOutAudio(mainMenuAudio);
 
             clearInterval(pulseInterval);
             document.getElementById('how-to-play-btn').style.display = 'none';
@@ -849,7 +872,7 @@
                 bg.style.visibility = 'visible';
                 bg.style.opacity = '1';
             }
-            spark.x = 5000; //start at last wire for testing
+            //spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
         }
