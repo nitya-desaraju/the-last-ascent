@@ -538,6 +538,9 @@
         const gameMusic = new Audio('assets/music1.mp3');
         gameMusic.loop = true;
         gameMusic.volume = 0;
+        const endingMusic = new Audio('assets/ending.mp3');
+        endingMusic.loop = true;
+        endingMusic.volume = 0;
 
         function fadeInAudio(audio) {
             audio.volume = 0;
@@ -552,11 +555,23 @@
             }, 100);
         }
 
-        window.addEventListener('mousedown', () => {
-            if (mainMenuAudio.paused && menuActive) {
-                mainMenuAudio.play();
-            }
-        }, { once: true });
+        ['click', 'keydown', 'touchstart', 'mousedown'].forEach(event => {
+            window.addEventListener(event, () => {
+                if (menuActive) {
+                    mainMenuAudio.play().catch(() => {});
+
+                    gameMusic.play().then(() => {
+                        gameMusic.pause();
+                        gameMusic.currentTime = 0;
+                    }).catch(() => {});
+
+                    endingMusic.play().then(() => {
+                        endingMusic.pause();
+                        endingMusic.currentTime = 0;
+                    }).catch(() => {});
+                }
+            }, { once: true });
+        });
 
         function fadeOutAudio(audio) {
             const fadePoint = setInterval(() => {
@@ -571,6 +586,7 @@
         }
 
         function fadeOutToMenu() {
+            fadeOutAudio(endingMusic);
             transLayer.style.transition = "opacity 1s ease";
             transLayer.style.opacity = '0';
             
@@ -1143,6 +1159,7 @@
             setTimeout(() => {
                 canvas.style.display = 'none';
                 jumpUI.style.display = 'none';
+                fadeInAudio(endingMusic);
 
                 typeWriter("Phase 1 Complete", 0, () => {
                     const tbc = document.getElementById('to-be-continued');
