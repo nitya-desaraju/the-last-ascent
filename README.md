@@ -4,7 +4,7 @@ Only the last few humans remain. Escape the underworld city before it's too late
 
 ## How to Play
 
-Use arrow keys or 'A' and 'D' keys to move. Press 'SPACE' to jump between wires. Don't let the battery run out.
+Use arrow keys or 'A' and 'D' keys to move. Press 'SPACE' to jump between wires. Don't let the battery run out. Click 'P' to pause and resume.
 
 ## Work in Progress
 
