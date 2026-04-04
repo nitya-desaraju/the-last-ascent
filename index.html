@@ -380,6 +380,17 @@
             font-size: 0.9rem;
             max-width: 500px;
         }
+
+        #ui-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 6;
+            pointer-events: none;
+            transition: opacity 1.5s ease;
+        }
     </style>
 
     <link rel="stylesheet" href="phase1-bg.css">
@@ -447,6 +458,7 @@
         <div class="street-floor"></div>
     </div>
 
+    <canvas id="ui-canvas"></canvas>
     <canvas id="game-canvas"></canvas>
     
     <div id="battery-container">
@@ -511,6 +523,67 @@
         let pulseInterval;
         let isPaused = false;
         let particles = [];
+        let menuParticles = [];
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let menuActive = true;
+
+        const uiCanvas = document.getElementById('ui-canvas');
+        const uiCtx = uiCanvas.getContext('2d');
+
+        function resizeUI() {
+            uiCanvas.width = window.innerWidth;
+            uiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeUI);
+        resizeUI();
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function createMenuParticle(x, y) {
+            menuParticles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: 1.0,
+                decay: Math.random() * 0.05 + 0.02
+            });
+        }
+
+        function menuLoop() {
+            if (!menuActive && menuParticles.length === 0) return;
+            
+            uiCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+            
+            if (menuActive) {
+                createMenuParticle(mouseX, mouseY);
+                createMenuParticle(mouseX, mouseY);
+            }
+
+            for (let i = menuParticles.length - 1; i >= 0; i--) {
+                let p = menuParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+
+                if (p.life <= 0) {
+                    menuParticles.splice(i, 1);
+                    continue;
+                }
+
+                uiCtx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+                uiCtx.shadowBlur = 10;
+                uiCtx.shadowColor = '#fff';
+                uiCtx.fillRect(p.x, p.y, 2, 2);
+            }
+            requestAnimationFrame(menuLoop);
+        }
+        menuLoop();
 
         function createSparkParticle(x, y) {
             particles.push({
@@ -661,6 +734,9 @@
         }
 
         function startTransition() {
+            menuActive = false;
+            uiCanvas.style.opacity = '0';
+
             clearInterval(pulseInterval);
             document.getElementById('how-to-play-btn').style.display = 'none';
             
