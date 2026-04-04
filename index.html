@@ -541,6 +541,8 @@
         const endingMusic = new Audio('assets/ending.mp3');
         endingMusic.loop = true;
         endingMusic.volume = 0;
+        const typingSound = new Audio('assets/typing.mp3');
+        typingSound.loop = true;
 
         function fadeInAudio(audio) {
             audio.volume = 0;
@@ -568,6 +570,10 @@
                     endingMusic.play().then(() => {
                         endingMusic.pause();
                         endingMusic.currentTime = 0;
+                    }).catch(() => {});
+
+                    typingSound.play().then(() => {
+                        typingSound.pause();
                     }).catch(() => {});
                 }
             }, { once: true });
@@ -792,13 +798,22 @@
 
         function typeWriter(text, i, fnCallback) {
             if (isPaused) {
+                typingSound.pause();
                 setTimeout(() => typeWriter(text, i, fnCallback), 100);
                 return;
             }
+
+            if (i === 0) {
+                typingSound.currentTime = 3;
+                typingSound.play();
+            }
+
             if (i < text.length) {
                 phaseText.innerHTML = text.substring(0, i+1);
                 setTimeout(() => typeWriter(text, i + 1, fnCallback), 100);
+
             } else if (typeof fnCallback == 'function') {
+                typingSound.pause();
                 setTimeout(fnCallback, 700);
             }
         }
