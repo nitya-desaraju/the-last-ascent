@@ -205,6 +205,23 @@
             transition: opacity 2s ease;
         }
 
+        #to-be-continued {
+            font-style: italic;
+            font-size: 1.25rem;
+            color: gray;
+            opacity: 0;
+            transition: opacity 2s ease;
+            margin-top: -10px;
+        }
+
+        #return-menu-btn {
+            margin-top: 60px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 2s ease;
+            border-radius: 2px;
+        }
+
         #overlay {
             display: none;
             position: fixed;
@@ -467,6 +484,8 @@
     <div id="transition-layer">
         <div id="phase-text"></div>
         <div id="continue-prompt">Click anywhere or any key to continue</div>
+        <div id="to-be-continued">To be continued...</div>
+        <button id="return-menu-btn" onclick="location.reload()">Return to Main Menu</button>
     </div>
 
     <div id="overlay">
@@ -915,12 +934,10 @@
                     currentPhase = 2;
 
                 } else if (currentPhase === 2) {
-                    startPhase3Transition();
-                    currentPhase = 3;
 
-                } else if (currentPhase === 3) {
-                    alert("phase 3");
-                }
+                    // startPhase3Transition();
+                    // currentPhase = 3;
+                } 
 
                 transLayer.style.transition = "opacity 1.5s ease";
                 transLayer.style.opacity = "0";
@@ -931,6 +948,7 @@
             }, 800);
         }
 
+        //currently ending transition after phase 1
         function startPhase2Transition() {
             transLayer.style.opacity = '0';
             transLayer.style.zIndex = '100000';
@@ -949,14 +967,21 @@
             continuePrompt.style.opacity = "0";
             canExitTransition = false;
             document.getElementById('battery-container').style.display = 'none';
+            document.getElementById('pause-btn').style.display = 'none';
 
             setTimeout(() => {
                 canvas.style.display = 'none';
                 jumpUI.style.display = 'none';
 
-                typeWriter("Phase 2: The Vessel", 0, () => {
-                    continuePrompt.style.opacity = '1';
-                    canExitTransition = true; 
+                typeWriter("Phase 1 Complete", 0, () => {
+                    const tbc = document.getElementById('to-be-continued');
+                    tbc.style.opacity = "1";
+                    
+                    setTimeout(() => {
+                        const menuBtn = document.getElementById('return-menu-btn');
+                        menuBtn.style.visibility = "visible";
+                        menuBtn.style.opacity = "1";
+                    }, 1000);
                 });
             }, 1500);
         }
