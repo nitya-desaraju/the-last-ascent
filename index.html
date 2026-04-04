@@ -497,7 +497,7 @@
         <div id="phase-text"></div>
         <div id="continue-prompt">Click anywhere or any key to continue</div>
         <div id="to-be-continued">To be continued...</div>
-        <button id="return-menu-btn" onclick="location.reload()">Return to Main Menu</button>
+        <button id="return-menu-btn" onclick="fadeOutToMenu()">Return to Main Menu</button>
     </div>
 
     <div id="overlay">
@@ -531,6 +531,22 @@
 
         const uiCanvas = document.getElementById('ui-canvas');
         const uiCtx = uiCanvas.getContext('2d');
+
+        function fadeOutToMenu() {
+            transLayer.style.transition = "opacity 1s ease";
+            transLayer.style.opacity = '0';
+            
+            setTimeout(() => {
+                transLayer.style.opacity = '1';
+                phaseText.style.opacity = '0';
+                document.getElementById('to-be-continued').style.opacity = '0';
+                document.getElementById('return-menu-btn').style.opacity = '0';
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }, 10);
+        }
 
         function resizeUI() {
             uiCanvas.width = window.innerWidth;
@@ -833,7 +849,7 @@
                 bg.style.visibility = 'visible';
                 bg.style.opacity = '1';
             }
-            //spark.x = 5000; //start at last wire for testing
+            spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
         }
