@@ -510,6 +510,37 @@
     <script>
         let pulseInterval;
         let isPaused = false;
+        let particles = [];
+
+        function createSparkParticle(x, y) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: 1.0,
+                decay: Math.random() * 0.05 + 0.02
+            });
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#fff';
+                ctx.fillRect(p.x - cameraX, p.y, 2, 2);
+            }
+        }
 
         const deathSentences = [
             "ALERT: SYSTEM FAILURE IMMINENT",
@@ -737,6 +768,8 @@
             if (!gameActive) return;
             if (!isPaused) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                updateParticles();
                 
                 let currentWire = wires.find(w => spark.x >= w.x && spark.x <= w.x + w.w);
                 let isMoving = keys.d || keys.ArrowRight || keys.a || keys.ArrowLeft;
@@ -856,6 +889,9 @@
                 );
 
                 if (!botTriggered) {
+                    createSparkParticle(spark.x, spark.y);
+                    createSparkParticle(spark.x, spark.y);
+
                     ctx.fillStyle = '#fff';
                     ctx.shadowBlur = 20;
                     ctx.shadowColor = '#fff';
