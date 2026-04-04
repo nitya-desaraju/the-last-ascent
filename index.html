@@ -535,6 +535,22 @@
         const mainMenuAudio = new Audio('assets/main_menu.mp3');
         mainMenuAudio.loop = true;
         mainMenuAudio.volume = 1;
+        const gameMusic = new Audio('assets/music1.mp3');
+        gameMusic.loop = true;
+        gameMusic.volume = 0;
+
+        function fadeInAudio(audio) {
+            audio.volume = 0;
+            const fadeTarget = 1.0;
+            const fadeIn = setInterval(() => {
+                if (audio.volume < fadeTarget) {
+                    audio.volume += 0.05;
+                } else {
+                    audio.volume = fadeTarget;
+                    clearInterval(fadeIn);
+                }
+            }, 100);
+        }
 
         window.addEventListener('mousedown', () => {
             if (mainMenuAudio.paused && menuActive) {
@@ -872,7 +888,7 @@
                 bg.style.visibility = 'visible';
                 bg.style.opacity = '1';
             }
-            //spark.x = 5000; //start at last wire for testing
+            spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
         }
@@ -1082,6 +1098,8 @@
                 if (currentPhase === 1) {
                     document.getElementById('menu-container').style.display = 'none';
                     initGame();
+                    gameMusic.play();
+                    fadeInAudio(gameMusic);
                     currentPhase = 2;
 
                 } else if (currentPhase === 2) {
@@ -1101,6 +1119,8 @@
 
         //currently ending transition after phase 1
         function startPhase2Transition() {
+            fadeOutAudio(gameMusic);
+
             transLayer.style.opacity = '0';
             transLayer.style.zIndex = '100000';
             transLayer.style.visibility = 'visible';
