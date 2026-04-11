@@ -393,7 +393,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="phase1-bg.css">
+    <link id="bg-style" rel="stylesheet" href="phase1-bg.css">
 </head>
 <body>
     <div class="dystopian-bg">
@@ -1127,6 +1127,8 @@
             continuePrompt.style.opacity = "0";
             
             setTimeout(() => {
+                const bg = document.querySelector('.dystopian-bg');
+
                 if (currentPhase === 1) {
                     document.getElementById('menu-container').style.display = 'none';
                     initGame();
@@ -1135,9 +1137,14 @@
                     currentPhase = 2;
 
                 } else if (currentPhase === 2) {
-
-                    // startPhase3Transition();
-                    // currentPhase = 3;
+                    document.getElementById('bg-style').href = 'phase2-bg.css';
+                    
+                    if (bg) {
+                        bg.style.visibility = 'visible';
+                        bg.style.opacity = '1';
+                    }
+                    
+                    currentPhase = 3; 
                 } 
 
                 transLayer.style.transition = "opacity 1.5s ease";
