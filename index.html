@@ -919,7 +919,7 @@
                 bg.style.visibility = 'visible';
                 bg.style.opacity = '1';
             }
-            //spark.x = 5000; //start at last wire for testing
+            spark.x = 5000; //start at last wire for testing
 
             requestAnimationFrame(gameLoop);
         }
@@ -1005,6 +1005,7 @@
                     botFrameCount++;
                     if (botXOffset > canvas.width) {
                         botWalking = false;
+                        gameActive = false;
                         startPhase2Transition();
                     }
                 }
@@ -1148,7 +1149,6 @@
             }, 800);
         }
 
-        //currently ending transition after phase 1
         function startPhase2Transition() {
             fadeOutAudio(gameMusic);
 
@@ -1174,17 +1174,10 @@
             setTimeout(() => {
                 canvas.style.display = 'none';
                 jumpUI.style.display = 'none';
-                fadeInAudio(endingMusic);
-
-                typeWriter("Phase 1 Complete", 0, () => {
-                    const tbc = document.getElementById('to-be-continued');
-                    tbc.style.opacity = "1";
-                    
-                    setTimeout(() => {
-                        const menuBtn = document.getElementById('return-menu-btn');
-                        menuBtn.style.visibility = "visible";
-                        menuBtn.style.opacity = "1";
-                    }, 1000);
+                
+                typeWriter("Phase 2: The Vessel", 0, () => {
+                    continuePrompt.style.opacity = '1';
+                    canExitTransition = true;
                 });
             }, 1500);
         }
